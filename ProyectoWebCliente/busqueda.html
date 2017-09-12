@@ -1,0 +1,312 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+		<link rel="stylesheet" href="bootstrap.min.css">
+		<script src="bootstrap.min.js"></script>
+		<link rel="icon"  href="icono.ico">
+		<title>Busqueda Star Wars</title>
+		<style type="text/css">
+			.display{font-family:sans-serif;}
+			.titulo{background:black;font-family:sans-serif;color:white;text-align:center;}
+			#btnBusqueda{background:black;font-family:sans-serif;color:white;text-align:center;font-size:20;}
+			#txtBusqueda{background:black;font-family:sans-serif;color:white;text-align:center;font-size:20;}
+			#carga{display:block;background:black;color:white;width:100%;height:100%;position:fixed;top:0;left:0;z-index:1000;}
+			#carga p{display:block;width:200px;height:250px;font-size:30px;position:absolute;top:0;left:0;bottom:0;right:0;margin:auto;}
+		</style>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script type="text/javascript">$(window).load(function(){$("#carga").delay(1000).fadeOut("200");});</script>
+		<script type="text/javascript" src="jquery-3.2.0.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="jquery.dataTables.min.css">
+		<link rel="stylesheet" type="text/css" href="select.dataTables.min.css">
+		<script type="text/javascript" src="jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="dataTables.select.min.js"></script>
+		<script type="text/javascript">	
+			var personajes;
+			function cargarPersonajes(){
+				personajes = new Array;
+				for(var i = 1; i <= 9; i++){
+					var url = "http://swapi.co/api/people/?page=" + i;
+					ejecutarLlamadoPersonajes(url);
+				}			 
+			}
+			
+			function ejecutarLlamadoPersonajes(url){	
+				var ejecutarCodigo = "$.getJSON( '" + url + "'," + "function(json) {" + "cargarInformacionPersonajes(json);});";	 		
+				eval(ejecutarCodigo);	 					 
+			}
+
+			function cargarInformacionPersonajes(json){
+				for(var i = 0; i < json.results.length; i++){
+					personajes.push(json.results[i]);
+				}
+			}
+			
+			function buscar(){
+				var nombre = document.getElementById("txtBusqueda").value;
+				var nombreArray = (nombre.toLowerCase()).split("");
+				var permitidos = "0123456789abcdefghijklmnopqrstuvwxyz "
+				var bandera = true;
+				var bandera2 = false;
+				for(i in nombreArray){
+					if(permitidos.indexOf(nombreArray[i]) == -1){
+						alert("Se ha ingresado un texto incorrecto");
+						txtBusqueda.value = "";
+						bandera = false;
+						break;						
+					}
+				}
+				if(bandera){
+					for(var i = 0; i < personajes.length; i++){
+						if((personajes[i].name.toLowerCase()).includes(nombre.toLowerCase())){
+							bandera2 = true;
+							txtBusqueda.value = personajes[i].name;
+							cargarPeliculas(personajes[i].name);
+							cargarNaves(personajes[i].name);
+							cargarVehiculos(personajes[i].name);
+							break;
+						}
+					}
+					if(!bandera2){
+						alert("El nombre no coincide con ninguno de la lista");
+						txtBusqueda.value = "";
+					}
+				}
+			}
+			
+			var peliculasArray;
+			var peliculasURL;
+			function cargarPeliculas(nombre){
+				peliculasArray = new Array;
+				for(var i = 0; i <= personajes.length; i++){
+					if(personajes[i].name == nombre){
+						break;
+					}
+				}
+				peliculasURL = personajes[i].films;
+				for(var j= 0; j < peliculasURL.length; j++){
+					var url = peliculasURL[j];
+					var bandera = j == peliculasURL.length-1 ? true : false;
+					ejecutarLlamadoPeliculas(url, bandera);
+				}
+				$("#peliculas1").css("display", "block");
+				$("#peliculas1").css("width", "100%");
+			}
+			
+			function ejecutarLlamadoPeliculas(url, bandera){	
+				var ejecutarCodigo = "$.getJSON( '" + url + "'," + "function(json) {" + "cargarInformacionPeliculas(json," + bandera  + ");});";	 		
+				eval(ejecutarCodigo);	 					 
+			}
+
+			function cargarInformacionPeliculas(json, bandera){
+				if(bandera){
+					peliculasArray.push(json);
+					pintarTablaPeliculas(peliculasArray);
+				}else{
+					peliculasArray.push(json);				
+				}
+			}
+			
+			function pintarTablaPeliculas(json){
+				var dataSet = new Array;
+				for(var i=0; i < json.length; i++){
+					var peli = new Array;
+					peli.push(json[i].title);
+					peli.push(json[i].director);
+					peli.push(json[i].producer);
+					peli.push(json[i].release_date);
+					dataSet.push(peli);
+				}
+				destruirTabla('peliculas');
+				$('#peliculas').DataTable({
+					destroy: true,
+					paging: false,
+					searching: false,
+					select: false,
+					info: false,
+					columnDefs: [{"className": "dt-center", "targets": "_all"}],
+					data: dataSet,
+					columns:[
+						{ title: "Título" },
+						{ title: "Director" },
+						{ title: "Productor" },
+						{ title: "Lanzamiento" }
+					]
+				 });
+			}
+			
+			var vehiculosArray;
+			var vehiculosURL;
+			function cargarVehiculos(nombre){
+				vehiculosArray = new Array;
+				for(var i = 0; i <= personajes.length; i++){
+					if(personajes[i].name == nombre){
+						break;
+					}
+				}
+				vehiculosURL = personajes[i].vehicles;
+				if(vehiculosURL.length==0){
+					pintarTablaVehiculos(vehiculosArray);
+				}else{
+					for(var j= 0; j < vehiculosURL.length; j++){
+						var url = vehiculosURL[j];
+						var bandera = j == vehiculosURL.length-1 ? true : false;
+						ejecutarLlamadoVehiculos(url, bandera);
+					}
+				}
+				$("#vehiculos1").css("display", "block");
+				$("#vehiculos1").css("width", "100%");
+			}
+			
+			function ejecutarLlamadoVehiculos(url, bandera){	
+				var ejecutarCodigo = "$.getJSON( '" + url + "'," + "function(json) {" + "cargarInformacionVehiculos(json," + bandera  + ");});";	 		
+				eval(ejecutarCodigo);	 					 
+			}
+
+			function cargarInformacionVehiculos(json, bandera){
+				if(bandera){
+					vehiculosArray.push(json);
+					pintarTablaVehiculos(vehiculosArray);
+				}else{
+					vehiculosArray.push(json);				
+				}
+			}
+			
+			function pintarTablaVehiculos(json){
+				var dataSet = new Array;
+				if(json.length == 0){
+					dataSet.push(["No tiene vehículos",""]);
+				}else{
+					for(var i=0; i < json.length; i++){
+						var vehi = new Array;
+						vehi.push(json[i].name);
+						vehi.push(json[i].model);
+						dataSet.push(vehi);
+					}
+				}
+				destruirTabla('vehiculos');
+				$('#vehiculos').DataTable({
+					destroy: true,
+					paging: false,
+					searching: false,
+					select: false,
+					info: false,
+					columnDefs: [{"className": "dt-center", "targets": "_all"}],
+					data: dataSet,
+					columns:[
+						{ title: "Nombre" },
+						{ title: "Modelo" }
+					]
+				 });
+			}
+			
+			var navesArray;
+			var navesURL;
+			function cargarNaves(nombre){
+				navesArray = new Array;
+				for(var i = 0; i <= personajes.length; i++){
+					if(personajes[i].name == nombre){
+						break;
+					}
+				}
+				navesURL = personajes[i].starships;
+				if(navesURL.length==0){
+					pintarTablaNaves(navesArray);
+				}else{
+					for(var j= 0; j < navesURL.length; j++){
+						var url = navesURL[j];
+						var bandera = j == navesURL.length-1 ? true : false;
+						ejecutarLlamadoNaves(url, bandera);
+					}
+				}
+				$("#naves1").css("display", "block");
+				$("#naves1").css("width", "100%");
+			}
+			
+			function ejecutarLlamadoNaves(url, bandera){	
+				var ejecutarCodigo = "$.getJSON( '" + url + "'," + "function(json) {" + "cargarInformacionNaves(json," + bandera  + ");});";	 		
+				eval(ejecutarCodigo);	 					 
+			}
+
+			function cargarInformacionNaves(json, bandera){
+				if(bandera){
+					navesArray.push(json);
+					pintarTablaNaves(vehiculosArray);
+				}else{
+					navesArray.push(json);				
+				}
+			}
+			
+			function pintarTablaNaves(json){
+				var dataSet = new Array;
+				if(json.length == 0){
+					dataSet.push(["No tiene naves","","",""]);
+				}else{
+					for(var i=0; i < json.length; i++){
+						var nav = new Array;
+						nav.push(json[i].name);
+						nav.push(json[i].model);
+						nav.push(json[i].manufacturer);
+						nav.push(json[i].cost_in_credits);
+						dataSet.push(nav);
+					}
+				}
+				destruirTabla('naves');
+				$('#naves').DataTable({
+					destroy: true,
+					paging: false,
+					searching: false,
+					select: false,
+					info: false,
+					columnDefs: [{"className": "dt-center", "targets": "_all"}],
+					data: dataSet,
+					columns:[
+						{ title: "Nombre" },
+						{ title: "Modelo" },
+						{ title: "Fabricante" },
+						{ title: "Costo en creditos" }
+					]
+				 });
+			}
+
+			function destruirTabla(idTabla){
+				var tablaExiste = $.fn.DataTable.isDataTable(idTabla);
+				if(tablaExiste){
+					$(("\'" + idTabla + " tbody\'")).off();
+					var tabla = $(idTabla).DataTable();
+					tabla.destroy(false); 
+				}	
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<span id="carga">
+				<p>
+					<img src="cargando2.jpg" width="200"><br><br>
+					<img src="cargando1.gif" width="200">
+				</p>
+			</span>
+			<center>
+				<img src="star_wars.jpg" width="500"></img>
+			</center>
+			<h1 class="titulo">Busqueda de personajes</h1>
+			<center>
+				<input class="form-control" type="text" id="txtBusqueda" size="70" placeholder="Ingrese el personaje que desea buscar"></input>
+				<br><input type="button" id="btnBusqueda" value="Buscar" onclick="buscar()"></input>
+			</center>
+			<div id="vehiculos1" style="display: none">
+				<h1 class="titulo">Vehículos</h1>
+				<table id="vehiculos" class="" width="100%"></table>		
+			</div>
+			<div id="naves1" style="display: none">
+				<h1 class="titulo">Naves Espaciales</h1>
+				<table id="naves" class="" width="100%"></table>		
+			</div>
+			<div id="peliculas1" style="display: none">	
+				<h1 class="titulo">Películas</h1>
+				<table id="peliculas" class="" width="100%"></table>		
+			</div>
+			<script type="text/javascript">cargarPersonajes();</script>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,50 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+		<link rel="stylesheet" href="bootstrap.min.css">
+		<script src="bootstrap.min.js"></script>
+		<link rel="shortcut icon" href="icono.ico">
+		<title>Star Wars Extra</title>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<style type="text/css">
+			body{background-image: url("star_wars1.jpg");}
+			#player{display:block;width:640px;height:360px;position:absolute;top:0;left:0;bottom:0;right:0;margin:auto;}
+			#carga{display:block;background:black;color:white;width:100%;height:100%;position:fixed;top:0;left:0;z-index:1000;}
+			#carga p{display:block;width:200px;height:250px;font-size:30px;position:absolute;top:0;left:0;bottom:0;right:0;margin:auto;}
+		</style>
+		<script type="text/javascript">$(window).load(function(){$("#carga").delay(700).fadeOut("100");});</script>
+	</head>
+	<body>
+		<div class="container">
+			<span id="carga">
+				<p>
+					<img src="cargando2.jpg" width="200"><br><br>
+					<img src="cargando1.gif" width="200">
+				</p>
+			</span>
+			<div id="player"></div>
+			<script>
+				var tag = document.createElement('script');
+				tag.src = "https://www.youtube.com/iframe_api";
+				var firstScriptTag = document.getElementsByTagName('script')[0];
+				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+				var player;
+				function onYouTubeIframeAPIReady(){
+					player = new YT.Player('player',{
+						height: '360',
+						width: '640',
+						videoId: 'zB4I68XVPzQ',
+						events: {
+						'onReady': onPlayerReady
+						}
+					});
+				}
+
+				function onPlayerReady(event) {
+					event.target.playVideo();
+				}
+			</script>
+		</div>
+	</body>
+</html>
