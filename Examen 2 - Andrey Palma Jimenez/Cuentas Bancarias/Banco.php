@@ -1,26 +1,27 @@
 <?php
 
 class Banco{
-	public $nombre
-	public $cuenta;
-	function __construct($nombre){
-		$this->nombre=$c;
-		$this->cuenta=[];
+	public $nombreBanco;
+	public $cuentas;
+	function __construct($nombreBanco){
+		$this->nombreBanco=$nombreBanco;
+		$this->cuentas=[];
 	}
 	
-	function agregarCuenta($cuenta){
-		$this->cuenta[]=$cuenta;
+	function agregarCuenta($cuentas){
+		$this->cuentas[]=$cuentas;
 	}
 	function buscar($buscaCuenta){
-		echo "<ul>";
-		foreach($this->cuenta as $cuenta){
-			if($buscaCuenta == $cuenta){
-				echo "<li>Cuenta encontrada exitosamente</li>";
-			}else{
-				echo "<li>La cuenta digitada no se encuentra</li>";
-			}
+		$existe=false;
+		foreach($this->cuentas as $cuenta){
+			if($cuenta->cuenta == $buscaCuenta){
+				echo "<b> La cuenta a nombre de $cuenta->cuenta si existe con un saldo de $cuenta->saldo colones </b>";
+				$encuentra = true;
+			}			
 		}
-		echo "</ul>";
+		if($encuentra==false){
+			echo "<b> La cuenta $buscaCuenta no existe </b>";
+		}
 	}
 	
 }
